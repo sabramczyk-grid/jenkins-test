@@ -1,5 +1,10 @@
 pipeline {
-    agent { docker { image 'python:3.10-slim' } }
+    agent { 
+        docker { 
+            image 'python:3.10-slim' 
+            args '--env HOME=${WORKSPACE}'
+        } 
+    }
 
     stages {
         stage('Install Dependencies') {
