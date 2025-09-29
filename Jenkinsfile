@@ -12,7 +12,7 @@ pipeline {
         stage('Lint Code') { 
             steps {
                 echo 'Linting code with flake8...'
-                sh 'python -m flake8 .'
+                sh 'flake8 .'
             }
         }
 
