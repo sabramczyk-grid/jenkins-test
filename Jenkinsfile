@@ -1,10 +1,6 @@
 pipeline {
     agent { docker { image 'python:3.10-slim' } }
 
-    environment {
-        PATH = "$HOME/.local/bin:$PATH"
-    }
-
     stages {
         stage('Install Dependencies') {
             steps {
@@ -16,7 +12,7 @@ pipeline {
         stage('Lint Code') { 
             steps {
                 echo 'Linting code with flake8...'
-                sh 'flake8 .'
+                sh 'python -m flake8 .'
             }
         }
 
