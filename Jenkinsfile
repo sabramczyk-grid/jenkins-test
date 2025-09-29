@@ -1,5 +1,10 @@
 pipeline {
     agent { docker { image 'python:3.10-slim' } }
+
+    environment {
+        PATH = "$HOME/.local/bin:$PATH"
+    }
+
     stages {
         stage('Install Dependencies') {
             steps {
