@@ -10,21 +10,21 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies from requirements.txt...'
-                sh 'pip install -r requirements.txt'
+                sh 'python -m pip install -r requirements.txt'
             }
         }
         
         stage('Lint Code') { 
             steps {
                 echo 'Linting code with flake8...'
-                sh 'flake8 .'
+                sh 'python -m flake8 .'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests with pytest...'
-                sh 'pytest'
+                sh 'python -m pytest'
             }
         }
 
