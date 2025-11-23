@@ -48,6 +48,7 @@ pipeline {
                 docker { 
                     // use image with SSH client
                     image 'alpine:latest' 
+                    args '-u 0'
                 } 
             }
             steps {
