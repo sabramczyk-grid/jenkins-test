@@ -14,7 +14,7 @@ def client():
 
 
 def test_root_route(client):
-    """Tests whether the root route returns the correct status code and content."""
+    """Tests whether the route returns the correct status code and content."""
 
     # Simulate a GET request to the root URL
     response = client.get('/')
