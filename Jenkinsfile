@@ -46,40 +46,36 @@ pipeline {
         stage('Deploy to EC2') {
             agent { 
                 docker { 
-                    // use image with SSH client
                     image 'alpine:latest' 
                     args '-u 0'
                 } 
             }
             steps {
                 script {
-                    // install SSH client in container
                     sh 'apk add --no-cache openssh-client bash'
                     
-                    // read server IP from file created by Terraform
                     def server_ip = readFile('server_ip.txt').trim()
                     echo "Deploying to Server IP: ${server_ip}"
 
-                    // use sshagent with our key
+                    // 1. Tworzymy skrypt deployu lokalnie
+                    // To jest bezpieczniejsze niż wpisywanie komend w 'ssh'
+                    sh """
+                        echo '#!/bin/bash' > deploy.sh
+                        echo 'sudo dnf install -y python3-pip' >> deploy.sh
+                        echo 'pip3 install -r requirements.txt' >> deploy.sh
+                        echo 'pkill -f helloworld.py || true' >> deploy.sh
+                        echo 'nohup python3 helloworld.py > flask.log 2>&1 < /dev/null &' >> deploy.sh
+                        echo 'echo "App started successfully!"' >> deploy.sh
+                        echo 'exit 0' >> deploy.sh
+                    """
+
                     sshagent(['ec2-ssh-key']) {
-                        // 1. Turn off host checking (StrictHostKeyChecking), because IP is new
-                        // 2. Copy app files
-                        sh "scp -o StrictHostKeyChecking=no helloworld.py requirements.txt ec2-user@${server_ip}:/home/ec2-user/"
+                        // 2. Kopiujemy pliki aplikacji ORAZ skrypt deployu
+                        sh "scp -o StrictHostKeyChecking=no helloworld.py requirements.txt deploy.sh ec2-user@${server_ip}:/home/ec2-user/"
                         
-                        // 3. Log in and start the app 
-                        // - Install pip
-                        // - Install requirements
-                        // - Kill old app instance (if running)
-                        // - Start new app in the background (nohup)
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ec2-user@${server_ip} '
-                                sudo dnf install -y python3-pip &&
-                                pip3 install -r requirements.txt &&
-                                pkill -f helloworld.py || true &&
-                                nohup python3 helloworld.py > flask.log 2>&1 < /dev/null &
-                                sleep 2
-                            '
-                        """
+                        // 3. Uruchamiamy skrypt na serwerze
+                        // Dzięki temu SSH czeka tylko na koniec skryptu bash, a nie na proces Pythona
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${server_ip} 'bash deploy.sh'"
                     }
                 }
             }
