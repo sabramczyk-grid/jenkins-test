@@ -24,7 +24,12 @@ pipeline {
 
         // --- STAGE 2: Infrastructure (Terraform) ---
         stage('Terraform Apply') {
-            agent { docker { image 'hashicorp/terraform:latest' } }
+            agent { 
+                docker { 
+                    image 'hashicorp/terraform:latest'
+                    args '--entrypoint=""'
+                } 
+            }            
             steps {
                 withCredentials([usernamePassword(credentialsId: 'aws-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     dir('terraform') {
