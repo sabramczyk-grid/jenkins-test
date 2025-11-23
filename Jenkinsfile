@@ -76,7 +76,8 @@ pipeline {
                                 sudo dnf install -y python3-pip &&
                                 pip3 install -r requirements.txt &&
                                 pkill -f helloworld.py || true &&
-                                nohup python3 helloworld.py > flask.log 2>&1 &
+                                nohup python3 helloworld.py > flask.log 2>&1 < /dev/null &
+                                sleep 2
                             '
                         """
                     }
